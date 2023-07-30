@@ -82,8 +82,8 @@ function LayoutOfStudentComponent() {
             const courseId = localStorage.getItem('courseId');
             let filter = [];
             courseId == null ?
-                filter = data.filter(obj => obj.user.role !== 'STUDENT') :
-                filter = data.filter(obj => obj.user.role !== 'STUDENT' && obj.user.courses?.some(item => item._id === courseId));
+                filter = data.filter(obj => obj.user?.role !== 'STUDENT') :
+                filter = data.filter(obj => obj.user?.role !== 'STUDENT' && obj.user.courses?.some(item => item._id === courseId));
             setMentors(filter);
         });
 
