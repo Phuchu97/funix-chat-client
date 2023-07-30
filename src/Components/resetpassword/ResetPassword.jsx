@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
-import { API_URL } from "../../Constants/ApiConstant";
+
 import { Grid, Box, Typography, Button } from "@mui/material";
 import { getUserDetail } from "../../Services/UserService";
+import { resetPassword } from "../../Services/LoginService";
 import { toast } from "react-toastify";
-import PasswordIcon from "@mui/icons-material/Password";
-import "./profile.css";
 
-function ProfileComponent() {
+import "./resetpassword.css";
+import Input from "@mui/material/Input";
+function ResetPasswordComponet() {
   const role = localStorage.getItem("role");
   const userId = localStorage.getItem("userId");
   const [user, setUser] = useState(null);
-
+  const [newPassword, setNewPassword] = useState("");
+  const [retypeNewPassword, setRetypeNewPassword] = useState("");
+  const hadleChangeNewPassword = (e) => {
+    setNewPassword(e.target.value);
+    console.log(e.target.value);
+  };
+  const hadleChangeRetyNewPassword = (e) => {
+    setRetypeNewPassword(e.target.value);
+    console.log(e.target.value);
+  };
   useEffect(() => {
     getUserDetail(
       (rs) => {
@@ -25,6 +35,20 @@ function ProfileComponent() {
       ""
     );
   }, []);
+  const handleSubmit = () => {
+    const data = { email: user.email, password: newPassword, id: user._id };
+    if (newPassword === retypeNewPassword) {
+      resetPassword((rs) => {
+        if (rs.statusCode === 200) {
+          toast.success("Thay Đổi Mật Khẩu Thành Công");
+        } else {
+          toast.error("Có lỗi trong quá trình xử lý!");
+        }
+      }, data);
+    } else {
+      toast.error("Nhập Lại Mật Khẩu Không Trung");
+    }
+  };
 
   return (
     <Grid className="layout-children layout-mentor-main">
@@ -127,7 +151,7 @@ function ProfileComponent() {
                       fontSize: "1.2rem",
                     }}
                   >
-                    Chức vụ
+                    Nhập Mật khẩu Mới
                   </Typography>
                   <Box
                     sx={{
@@ -140,7 +164,11 @@ function ProfileComponent() {
                       borderRadius: "5px",
                     }}
                   >
-                    {user.role}
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={hadleChangeNewPassword}
+                    ></Input>
                   </Box>
                 </Box>
 
@@ -153,7 +181,7 @@ function ProfileComponent() {
                       fontSize: "1.2rem",
                     }}
                   >
-                    Thay Đổi Mật Khẩu
+                    Nhập Lại Mật khẩu Mới
                   </Typography>
                   <Box
                     sx={{
@@ -166,7 +194,41 @@ function ProfileComponent() {
                       borderRadius: "5px",
                     }}
                   >
-                    <Button startIcon={<PasswordIcon />}></Button>
+                    <Input
+                      type="password"
+                      value={retypeNewPassword}
+                      onChange={hadleChangeRetyNewPassword}
+                    ></Input>
+                  </Box>
+                </Box>
+                <Box display="flex" fullWith marginBottom="2rem">
+                  <Typography
+                    sx={{
+                      alignSelf: "center",
+                      width: "15%",
+                      fontWeight: "600",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    SUBMIT
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      border: "1px solid rgba(0,0,0,0.1)",
+                      padding: "12px 16px",
+                      width: "80%",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    <Button
+                      disabled={newPassword === "" || retypeNewPassword === ""}
+                      onClick={handleSubmit}
+                    >
+                      SUBMIT
+                    </Button>
                   </Box>
                 </Box>
               </Box>
@@ -178,4 +240,4 @@ function ProfileComponent() {
   );
 }
 
-export default ProfileComponent;
+export default ResetPasswordComponet;

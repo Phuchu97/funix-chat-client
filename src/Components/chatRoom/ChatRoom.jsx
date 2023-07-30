@@ -4,11 +4,13 @@ import Typography from "@mui/material/Typography";
 import { List, ListItem, Box } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import Button from "@mui/material/Button";
+
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Rating,
 } from "@mui/material";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import "./chatRoom.css";
@@ -27,6 +29,7 @@ import ModalZoomImage from "../../shares/ModalZoomImage";
 import Avatar from "@mui/material/Avatar";
 import io from "socket.io-client";
 import { Howl } from "howler";
+import { postRate } from "../../Services/RateService";
 const socket = io(API_URL);
 
 const userId = localStorage.getItem("userId");
@@ -45,7 +48,9 @@ function ChatRoomComponent() {
   const [conversations, setConversations] = useState([]);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-
+  const [rate, setRate] = useState(false);
+  const [valueRate, setValueRate] = useState(null);
+  console.log({ conversations });
   const mentor =
     conversations.find((c) => c.sender.role === "MENTOR") === undefined
       ? false
@@ -61,27 +66,28 @@ function ChatRoomComponent() {
               localStorage.setItem("seconds", 0);
               localStorage.setItem("minutes", 0);
               socket.emit("end-conversation", getUser[0]);
-
-              navigate("/home");
-              toast.success("Buổi trao đổi kết thúc!");
+              setRate(true);
+              //navigate("/home");
+              //toast.success("Buổi trao đổi kết thúc!");
             } else {
-              toast.error("Có lỗi trong quá trình xử lý!");
+              //toast.error("Có lỗi trong quá trình xử lý!");
             }
           }, roomId);
         } else {
           endRoomChat((rs) => {
             if (rs.statusCode === 200) {
-              navigate("/home");
+              setRate(true);
+              //navigate("/home");
               toast.success("Buổi trao đổi kết thúc!");
               localStorage.setItem("seconds", 0);
               localStorage.setItem("minutes", 0);
             } else {
-              toast.error("Có lỗi trong quá trình xử lý!");
+              //toast.error("Có lỗi trong quá trình xử lý!");
             }
           }, roomId);
         }
       } else {
-        toast.error("Có lỗi trong quá trình xử lý!");
+        // toast.error("Có lỗi trong quá trình xử lý!");
         return;
       }
     }, roomId);
@@ -203,7 +209,8 @@ function ChatRoomComponent() {
     });
 
     socket.on(`end-conversation-success/${userId}`, () => {
-      navigate("/home");
+      //navigate("/home");
+      setRate(true);
       toast.success("Buổi trao đổi kết thúc!");
     });
 
@@ -275,7 +282,34 @@ function ChatRoomComponent() {
   const closeModalZoom = () => {
     setOpenModalZoom(false);
   };
-  console.log({ minutes });
+  const handleRate = () => {
+    const student = conversations[0].sender._id;
+    const mentor = conversations[1].sender._id;
+    const date = conversations[0].createdAtDay;
+    const room = conversations[0].room;
+    const data = {
+      student: student,
+      mentor: mentor,
+      date: date,
+      rate: valueRate,
+      room: room,
+    };
+    postRate((res) => {
+      if (res.statusCode === 200) {
+        toast.success("Đánh Giá thành công!", { className: "toast-message" });
+      } else {
+        if (res.message) {
+          toast.error(res.message, { className: "toast-message" });
+        } else {
+          toast.error("Có lỗi trong quá trình xử lý!", {
+            className: "toast-message",
+          });
+        }
+      }
+    }, data);
+    navigate("/home");
+  };
+
   if (minutes >= 1 && seconds > 10) {
     endConversation();
   }
@@ -286,7 +320,7 @@ function ChatRoomComponent() {
           <Grid>
             <span>{formatTime(minutes)}:</span>
             <span>{formatTime(seconds)}</span>
-            {minutes >= 1 && seconds < 10 && (
+            {minutes >= 1 && seconds < 10 && !rate && (
               <div>
                 <Dialog open={minutes >= 1}>
                   <DialogTitle>Block</DialogTitle>
@@ -306,6 +340,33 @@ function ChatRoomComponent() {
                 </Dialog>
               </div>
             )}
+            {
+              <div>
+                <Dialog open={rate} size="large">
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    minHeight="10vh"
+                  >
+                    <DialogContent padding={5}>
+                      <Rating
+                        name="simple-controlled"
+                        size="large"
+                        onChange={(event, newValue) => {
+                          setValueRate(newValue);
+                        }}
+                      />
+                    </DialogContent>
+                    <DialogContent>
+                      <Button variant="outlined" onClick={handleRate}>
+                        Đánh Giá
+                      </Button>
+                    </DialogContent>
+                  </Box>
+                </Dialog>
+              </div>
+            }
           </Grid>
           <Typography m={0} align="center" variant="p" gutterBottom>
             phòng trao đổi
