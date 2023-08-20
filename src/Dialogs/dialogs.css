@@ -1,0 +1,16 @@
+.dialog-change-password {
+    min-width: 40rem;
+}
+
+
+@media (max-width: 540px) {
+    .dialog-change-password {
+        min-width: 30rem;
+    }
+}
+
+@media (max-width: 495px) {
+    .dialog-change-password {
+        min-width: 20rem;
+    }
+}

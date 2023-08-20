@@ -27,3 +27,17 @@ export function editImageUser(callback, user, url) {
     .then(res => res.json())
     .then(callback);
 }
+
+export function resetPasswordUser(callback, data) {
+    const token = localStorage.getItem('token');
+    fetch(`${API_URL}/user-reset-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(callback);
+}

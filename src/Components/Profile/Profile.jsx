@@ -9,6 +9,7 @@ import { editImageUser } from '../../Services/UserService';
 import { ColorRing } from 'react-loader-spinner';
 import './profile.css';
 import { AuthContext } from '../../Context/AuthLogin'
+import ChangePasswordDialog from '../../Dialogs/ChangePassword';
 
 
 function ProfileComponent() {
@@ -16,6 +17,7 @@ function ProfileComponent() {
   const userId = localStorage.getItem('userId');
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialog, setIsDialog] = useState(false);
 
   const handleGetUserDetail = () => {
     getUserDetail((rs) => {
@@ -47,11 +49,19 @@ function ProfileComponent() {
     file ? handleSendFile(file) : toast.error('firebase error!');
   };
 
+  const openDialog = () => {
+    setIsDialog(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialog(false);
+  };
+
   return (
     <Grid className='layout-children layout-mentor-main'>
       <Grid className='layout-mentor'>
         <Grid container>
-          <Grid item xs={4} lg={5}>
+          <Grid item xs={12} sm={12} md={4} lg={5} sx={{ display: 'flex' }}>
             {isLoading ? <Box sx={{ height: '100%' }} display="flex" justifyContent="center" alignItems="center">
               <ColorRing
                 visible={true}
@@ -83,11 +93,11 @@ function ProfileComponent() {
             </Box>}
           </Grid>
 
-          <Grid item xs={8} lg={7}>
+          <Grid item xs={12} sm={12} md={8} lg={7}>
             {
               user && <Box sx={{ minHeight: '30vh' }}>
                 <Box sx={{ width: '100%', paddingBottom: '3rem' }} display="flex" justifyContent="center"  >
-                  <Typography variant='h2'>Thông Tin Tài Khoản</Typography>
+                  <Typography variant='h2' sx={{ textAlign: 'center' }}>Thông Tin Tài Khoản</Typography>
                 </Box>
                 <Box display="flex" marginBottom="2rem">
                   <Typography
@@ -187,11 +197,22 @@ function ProfileComponent() {
                     <input style={{ border: "none" }} type="password" value={user.password} />
                   </Box>
                 </Box>
+                <Box display="flex" marginBottom="2rem" sx={{ justifyContent: "center"}}>
+                  <Typography
+                    sx={{
+                      alignSelf: 'center',
+                      width: '15%',
+                      fontWeight: '600',
+                      fontSize: '1.2rem'
+                    }}>
+                  </Typography>
+                  <Button onClick={openDialog} sx={{backgroundColor: "#ffe4c4"}}>Đổi mật khẩu</Button>
+                </Box>
               </Box>
             }
           </Grid>
         </Grid>
-
+        <ChangePasswordDialog open={isDialog} handleClose={closeDialog}></ChangePasswordDialog>
       </Grid>
     </Grid>
   )
